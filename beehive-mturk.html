@@ -1,0 +1,553 @@
+<script type = "text/javascript">
+var canvas_supported;
+var canvas;
+var context;
+var trial = Array();
+var current_trial = 0;
+var src_url = "http://mit.edu/~akimitsu/www/images/";
+
+function init()
+{
+    canvas_supported = !!document.createElement('canvas').getContext;
+    set_body();
+    parse();
+    clear_screen();
+    draw_trial();
+}
+function preload_images()
+{
+    images = ["bc.png","bq.png","bs.png","bt.png","gc.png","gq.png","gs.png","gt.png","oc.png","oq.png","os.png","ot.png","rc.png","rq.png","rs.png","rt.png","sh.png","wh.png","yc.png","yq.png","ys.png","yt.png"];
+    for(i=0;i<images.length;i++)
+    {
+        temp = new Image();
+        temp.src = src_url + images[i];
+    }
+    return;
+}
+    
+function set_body()
+{
+    if(canvas_supported)
+    {
+        document.getElementById("canvas").style.display = "inline";
+        canvas = document.getElementById("canvas");
+        context = canvas.getContext("2d");
+    }
+    else
+    {
+        document.getElementById("notcanvas").style.display = "inline-block";
+        preload_images();
+    }
+
+    document.onkeypress = key_pressed;
+    document.body.style.backgroundColor = "#000000";
+    document.body.style.fontFamily = "sans-serif";
+    document.body.style.fontSize = "20pt";
+    document.body.style.color = "#FFFFFF";
+    document.body.style.textAlign = "center";
+}
+function parse()
+{
+    old_submit = document.getElementById("submitButton");
+    old_submit.parentNode.removeChild(old_submit);
+    experiment_number = ${experiment};
+    record_variable("Experiment",experiment_number);
+    data = "${data}";
+    //data = "#Comment|Trial1	4	24	9	yes|Is Aki an awesome person?|What is your name?|c	r	20	1	(2;3)|t	w	30	1	(3;4)|s	w	20	1	(3;1)|q	y	30	1	(5;2)|c	r	20	2	(5;1)|c	r	30	2	(6;2)|t	g	20	3	(4;1)|s	b	30	4	(1;2)|q	y	20	4	(3;3)|c	r	30	4	(4;2)|c	w	20	5	(4;4)|t	g	30	5	(5;3)|s	b	20	5	(5;4)|q	y	30	5	(6;1)|c	r	20	5	(2;4)|c	w	30	6	(6;4)|t	w	20	8	(1;3)|s	b	30	8	(4;3)|q	y	20	8	(3;2)|c	r	30	8	(1;1)|c	r	20	8	(2;2)|t	w	30	9	(1;4)|s	b	20	9	(6;3)|q	y	30	9	(2;1)|#Comment|Trial2	3	24	5	no|Are you human?||c	r	20	4|c	r	30	4|c	r	20	4|c	r	30	4|c	r	20	4|c	r	30	3|c	r	20	3|c	r	30	4|c	r	20	4|c	r	30	4|c	r	20	4|c	r	30	5|c	r	20	4|c	r	30	4|c	r	20	4|c	r	30	1|c	r	20	1|c	r	30	1|c	r	20	1|c	r	30	4|c	r	20	2|c	r	30	2|c	r	20	4|c	r	30	4||";
+    for(i=0;i<data.length;i++){if(data.charAt(i) == ';'){data = data.substring(0,i) + "," + data.substring(i+1);}}
+    data = data.split("|");
+    line = get_next_line(data);
+    while(line != null && line.length > 0)
+    {
+        trial_name = line.split("\t")[0];
+        num_rows = parseInt(line.split("\t")[1]);
+        num_shapes = parseInt(line.split("\t")[2]);
+        num_frames = parseInt(line.split("\t")[3]);
+                
+        prem_allowed = false;
+        if(line.split("\t")[4] == 'yes')
+            prem_allowed = true;
+            
+        question1 = get_next_line(data);
+        question2 = get_next_line(data);
+        if(question2 == "")
+            question2 = null;
+            
+        color_list = [];radius_list = [];shape_list = [];position_list = [];frame_list = Array(num_frames+2);
+        for(i=0;i<num_frames+2;i++)
+            frame_list[i] = [Array(),Array()];
+        
+        for(i=0;i<num_shapes;i++)
+        {
+            line = get_next_line(data);
+            shape_list.push(line.split('\t')[0]);
+            color_list.push(line.split('\t')[1]);
+            radius_list.push(parseInt(line.split('\t')[2]));
+            if(line.split('\t').length == 4)
+                position = parseInt(i+1);
+            else if(line.split('\t').length == 5)
+            {   
+                if(line.split('\t')[4].indexOf(',') == -1)
+                    position = parseInt(line.split('\t')[4]);
+                else
+                {
+                    c = parseInt(line.split('\t')[4].split(',')[0].substring(1));
+                    r = parseInt(line.split('\t')[4].split(',')[1].substring(0,line.split('\t')[4].split(',')[1].length - 1));
+                    position = r + (c-1) * num_rows;
+                }
+            }
+            position_list.push(position);
+            
+            frame = parseInt(line.split("\t")[3])
+            frame_list[frame][1].push(position);
+            for(j = frame+1;j<num_frames+2;j++)
+                frame_list[j][0].push(position);
+        }
+        if(canvas_supported)
+            t = new trial_object(trial_name,question1,frame_list,prem_allowed,canvas.height,canvas.width,0.05*canvas.height,0.05*canvas.width,num_rows,2,color_list,radius_list,shape_list,position_list);
+        else
+        {
+            obj = document.getElementById("notcanvas");
+            t = new trial_object(trial_name,question1,frame_list,prem_allowed,obj.offsetHeight,obj.offsetWidth,0.05*obj.offsetHeight,0.05*obj.offsetWidth,num_rows,2,color_list,radius_list,shape_list,position_list);
+        }
+        
+        if(question2 != null)
+            t.add_second_question(question2);
+        trial.push(t);
+        
+        line = get_next_line(data);
+    }    
+  
+}
+var curr_line = 0;
+function get_next_line(data)
+{
+    if(curr_line >= data.length)
+        return null;
+        
+    while(data[curr_line].length > 0 && data[curr_line].charAt(0) == '#')
+    {
+        curr_line++;
+        if(curr_line >= data.length)
+            return null;
+    }
+    curr_line++;
+    return data[curr_line-1];
+}
+function direct_experiment(key)
+{
+    if(current_trial < trial.length)
+    {
+        if(key=='b')
+        {
+            //Set starting time
+            if(trial[current_trial].current_frame == 0)
+                trial[current_trial].start_time = time();
+                
+            //Set time for when time for when answering is allowed
+            if(trial[current_trial].current_frame == trial[current_trial].num_frames - 2)
+                trial[current_trial].answer_time = time();
+
+            if(trial[current_trial].current_frame < trial[current_trial].num_frames - 1)
+            {
+                trial[current_trial].current_frame++;
+                draw_trial(trial[current_trial]);
+            }
+        }
+        if(key=='j' || key=='f')
+        {
+            if(trial[current_trial].current_frame == trial[current_trial].num_frames-1 || (trial[current_trial].prem_allowed && trial[current_trial].current_frame > 0))
+            {
+                if(key == 'j')
+                    record_variable(trial[current_trial].trial_name + ".usr_answer","yes");
+                if(key == 'f')
+                    record_variable(trial[current_trial].trial_name + ".usr_answer","no");
+                
+                //Record time since first shape was shown
+                record_variable(trial[current_trial].trial_name + ".time_from_start",time() - trial[current_trial].start_time)                
+                //Record time since answering is allowed only if preemptive answering is not allowed
+                if(!trial[current_trial].prem_allowed)
+                    record_variable(trial[current_trial].trial_name + ".time_to_answer",time() - trial[current_trial].answer_time)
+
+                //Ask second question
+                if(trial[current_trial].second_question != null)
+                    record_variable(trial[current_trial].trial_name + ".usr_answer2",prompt(trial[current_trial].second_question));
+                
+                current_trial++;
+
+                if(current_trial >= trial.length)
+                    finish_experiment();
+                else
+                    draw_trial(trial[current_trial]);
+            }
+        }
+    }
+}
+function finish_experiment()
+{
+    clear_screen("#000000");
+    //document.getElementById("variables").style.display = "block";
+    set_top_text("Thank you for participating in our study.");
+    set_bottom_text("Press Submit to finish.");
+    document.getElementById("finished").style.display = "block";
+    document.getElementById("comments").disabled = false;
+    document.getElementById("Submit").disabled = false;
+}
+function trial_object(trial_name,question,frame_list,prem_allowed,window_height,window_width,window_hmargin,window_wmargin,num_rows,line_width,color_list,radius_list,shape_list,position_list)
+{
+    this.trial_name = trial_name;
+    this.question = question;
+    this.second_question = null;
+    this.add_second_question = add_second_question;
+    
+    this.frame_list = frame_list;
+    this.num_frames = this.frame_list.length;
+    this.prem_allowed = prem_allowed;
+    
+    this.start_time = 0;
+    this.answer_time = 0;
+    
+    this.window_height = window_height;
+    this.window_width = window_width;
+    this.window_hmargin = window_hmargin;
+    this.window_wmargin = window_wmargin;
+    this.num_rows = num_rows;
+    this.line_width = line_width;
+    this.color_list = color_list;
+    this.radius_list = radius_list;
+    this.max_radius = Math.max.apply(Math,radius_list)
+    this.shape_list = shape_list;
+    this.position_list = position_list;
+    
+    this.num_shapes = color_list.length;
+    this.num_positions = Math.max.apply(Math,position_list)
+    
+    this.num_cols =  Math.ceil(this.num_positions/this.num_rows);
+    col_width1 = (window_width - 2*window_wmargin)/(this.num_cols+1);
+    row_height1 = col_width1 * Math.sqrt(3)/2;
+    row_height2 = (window_height - 2*window_hmargin)/(num_rows+1);
+    col_width2 = row_height2/ (Math.sqrt(3)/2);
+    
+    this.col_width = Math.min(col_width1,col_width2);
+    this.row_height = Math.min(row_height1,row_height2);
+    
+    this.current_frame = 0;
+}
+function add_second_question(question)
+{
+    this.second_question = question;
+}
+function draw_trial()w
+{
+    clear_screen("#000000");
+
+    //color: array of characters, 'r','g','b','y' or 'w'
+    //shape: vector of characters, 't','q','c','s'
+    frame = trial[current_trial].current_frame;
+    
+    set_top_text(trial[current_trial].question)
+    if(frame == 0)
+        set_bottom_text("Press [b] to start");
+    else if(frame > 0 && frame < trial[current_trial].num_frames-1)
+    {
+        if (trial[current_trial].prem_allowed)
+            set_bottom_text("Press [b] to continue or [f] to answer no, [j] to answer yes.");
+        else
+            set_bottom_text("Press [b] to continue");
+    }
+    else
+        set_bottom_text("Press [f] to answer no, [j] to answer yes.");
+    
+    hidden_list = trial[current_trial].frame_list[frame][0];
+    shown_list = trial[current_trial].frame_list[frame][1];
+    
+
+    for(var i=0;i<trial[current_trial].num_shapes;i++)
+    {
+        var f=(trial[current_trial].position_list[i]-1)%(trial[current_trial].num_rows) + 1;
+        var y = trial[current_trial].window_height/2 - (trial[current_trial].num_rows + 1) * trial[current_trial].row_height/2 + f*trial[current_trial].row_height;
+        //      ^middle                  ^offset to base                            ^rows
+        
+        var c= Math.floor((trial[current_trial].position_list[i]-1)/trial[current_trial].num_rows);
+        var x = trial[current_trial].window_width/2 - (trial[current_trial].num_cols - 1) * trial[current_trial].col_width/2 + trial[current_trial].col_width * c;
+        
+        if(f%2 == 1)
+            x = x + trial[current_trial].col_width/4;
+        else
+            x = x - trial[current_trial].col_width/4;
+        
+        var grey = "#777777";
+        if(hidden_list.length != 0 && contains(hidden_list,trial[current_trial].position_list[i]))
+        {
+            if(canvas_supported)
+                draw_hexagon(trial[current_trial].max_radius,x,y,grey,trial[current_trial].line_width,true);
+            else
+            {
+                var new_div = document.createElement('div');
+                new_div.innerHTML = '<img src = "' + src_url + 'sh.png" ' + html_shape_style(x,y,trial[current_trial].max_radius) + '>';
+                document.getElementById("notcanvas").appendChild(new_div);
+            }
+        }
+        else if(shown_list.length != 0 && contains(shown_list,trial[current_trial].position_list[i]))
+        {
+            if(canvas_supported)
+            {
+                col = char_to_col(trial[current_trial].color_list[i])
+                switch(trial[current_trial].shape_list[i])
+                {
+                    case 't':
+                        draw_triangle(trial[current_trial].radius_list[i],x,y,col,trial[current_trial].line_width,true);
+                        break;
+                    case 'q':
+                        draw_square(trial[current_trial].radius_list[i],x,y,col,trial[current_trial].line_width,true);
+                        break;
+                    case 'c':
+                        draw_circle(trial[current_trial].radius_list[i],x,y,col,trial[current_trial].line_width,true);
+                        break;
+                    case 's':
+                        draw_star(trial[current_trial].radius_list[i],x,y,col,trial[current_trial].line_width,true);
+                        break;
+                }
+            }
+            else
+            {
+                var new_div = document.createElement('div');
+                new_div.innerHTML = '<img src = "' + src_url + trial[current_trial].color_list[i] + trial[current_trial].shape_list[i] + '.png" ' + html_shape_style(x,y,trial[current_trial].radius_list[i]) + '>';
+                document.getElementById("notcanvas").appendChild(new_div);
+            }            
+        }
+        else
+        {
+            if(canvas_supported)
+                draw_hexagon(trial[current_trial].max_radius,x,y,grey,trial[current_trial].line_width,false);
+            else
+            {
+                var new_div = document.createElement('div');
+                new_div.innerHTML = '<img src = "' + src_url + 'wh.png" ' + html_shape_style(x,y,trial[current_trial].max_radius) + '>';
+                document.getElementById("notcanvas").appendChild(new_div);
+            }
+        }
+    }
+    return;
+}
+function html_shape_style(x,y,radius)
+{
+    ol = get_position(document.getElementById("notcanvas")).x;
+    ot = get_position(document.getElementById("notcanvas")).y;
+    return 'width = ' + (2*radius) + 'px height = ' + (2*radius) + 'px style = "display:float;position:absolute;top:' + (y + ot - radius) + 'px;left:' + (x+ol-radius) + 'px;"'
+}
+function get_position(el)
+{
+    for (var lx=0, ly=0;
+         el != null;
+         lx += el.offsetLeft, ly += el.offsetTop, el = el.offsetParent);
+    return {x: lx,y: ly};
+}
+
+function contains(array,object)
+{
+    for(i=0;i<array.length;i++)
+    {
+        if(array[i]==object)
+            return true;
+    }
+    return false;
+}
+
+function char_to_col(c)
+{
+    switch(c)
+    {
+    case 'r':
+        return "#FF0000";
+    case 'g':
+        return "#00FF00";
+    case 'b':
+        return "#0000FF";
+    case 'y':
+        return "#FFFF00";
+    case 'w':
+        return "#FFFFFF";
+    default:
+        return "#000000";
+    }
+}
+function clear_screen(color)
+{
+    if(canvas_supported)
+    {
+        canvas.width = canvas.width;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = color;
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+    }
+    else
+    {
+        document.getElementById("notcanvas").innerHTML = "";
+    }
+}
+function draw_triangle(r,x,y,color,line_width,fill)
+{
+    if(fill == false){r-=line_width/2;}
+    
+    context.lineWidth = line_width;
+    context.beginPath();
+    context.moveTo(x,y-r);
+    for(var i=1;i<=3;i++)
+    {
+        angle = i * 2*Math.PI/3;
+        context.lineTo(x - r * Math.sin(angle),y - r * Math.cos(angle));
+    }
+    if(fill == false)
+    {
+        context.strokeStyle = color;
+        context.stroke();
+    }
+    else
+    {
+        context.fillStyle = color;
+        context.fill()
+    }
+    context.closePath();
+}
+function draw_square(r,x,y,color,line_width,fill)
+{
+    if(fill == false){r-=line_width/2;}
+
+    context.lineWidth = line_width;    
+    context.beginPath();
+    s = Math.sqrt(2);
+    context.moveTo(x-r/s,y-r/s);
+    context.lineTo(x-r/s,y+r/s);
+    context.lineTo(x+r/s,y+r/s);
+    context.lineTo(x+r/s,y-r/s);
+    context.lineTo(x-r/s,y-r/s);
+    if(fill == false)
+    {
+        context.strokeStyle = color;
+        context.stroke();
+    }
+    else
+    {
+        context.fillStyle = color;
+        context.fill()
+    }
+    context.closePath();
+}
+function draw_star(r,x,y,color,line_width,fill)
+{
+    if(fill == false){r-=line_width/2;}
+
+    context.lineWidth = line_width;
+    
+    context.beginPath();
+    context.moveTo(x,y-r);
+    for(var i=1;i<=10;i++)
+    {
+        angle = i * (Math.PI + 2 * Math.PI/10);
+        context.lineTo(x - r * Math.sin(angle),y - r * Math.cos(angle));
+    }
+    if(fill == false)
+    {
+        context.strokeStyle = color;
+        context.stroke();
+    }
+    else
+    {
+        context.fillStyle = color;
+        context.fill()
+    }
+    context.closePath();
+}
+function draw_hexagon(r,x,y,color,line_width,fill)
+{
+    if(fill == false){r-=line_width/2;}
+
+    context.lineWidth = line_width;
+    
+    context.beginPath();
+    context.moveTo(x,y-r);
+    for(var i=1;i<=6;i++)
+    {
+        angle = i * (2 * Math.PI/6);
+        context.lineTo(x - r * Math.sin(angle),y - r * Math.cos(angle));
+    }
+    if(fill == false)
+    {
+        context.strokeStyle = color;
+        context.stroke();
+    }
+    else
+    {
+        context.fillStyle = color;
+        context.fill()
+    }
+    context.closePath();
+}
+function draw_circle(r,x,y,color,line_width,fill)
+{
+    if(fill == false){r-=line_width/2;}
+
+    context.lineWidth = line_width;
+    
+    context.beginPath();
+    context.arc(x,y,r,0,Math.PI*2,true);
+    if(fill == false)
+    {
+        context.strokeStyle = color;
+        context.stroke();
+    }
+    else
+    {
+        context.fillStyle = color;
+        context.fill()
+    }
+    context.closePath();
+}
+function set_top_text(text)
+{
+    document.getElementById("top").innerHTML = text;
+}
+function set_bottom_text(text)
+{
+    document.getElementById("bottom").innerHTML = text;
+}
+function key_pressed(event)
+{
+    if(window.event)
+        keynum = window.event.keyCode;
+    else if(event.which)
+        keynum = event.which;
+    key = String.fromCharCode(keynum);
+    direct_experiment(key);
+}
+function time()
+{
+    return (new Date()).getTime();
+}
+function record_variable(name,value)
+{
+    var new_div = document.createElement('div');
+    new_div.innerHTML = '<input type = "text" id = "' + name + '" name = "' + name + '" value = "' + value + '"/>';
+    document.getElementById('variables').appendChild(new_div);
+}
+</script>
+</head>
+
+<body>
+<div id = "top" width = "800" height = "300"></div>
+<canvas id = "canvas" width = 800 height = 600 style = "width:800;height:600;display:none;border:1px dotted"></canvas>
+<div id = "notcanvas" width = 800 height = 600 style = "width:800;height:600;display:none;border:1px dotted"></div>
+<div id = "bottom" width = "800" height = "300"></div>
+<div id = "variables" style = "display:none"></div>
+<div id = "finished" style = "display:none">
+<textarea id = "comments" name = "comments" rows = "4" cols = "50" disabled>Comments are appreciated</textarea><br>
+<input id = "Submit" name = "Submit" value = "Submit" type = "Submit" disabled></input>
+</div>
+
+<script type = "text/javascript">
+init();
+</script>
+
+</body>
+
