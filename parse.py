@@ -1,4 +1,7 @@
 import sys
+if len(sys.argv) < 3:
+    print 'Input format: python parse.py [file_in1] [file_in2] ... [file_out]'
+    quit()
 fout = open(sys.argv[len(sys.argv) - 1],'w')
 fout.write('experiment,data\n');
 i = 1
