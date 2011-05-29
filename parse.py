@@ -4,11 +4,11 @@ if len(sys.argv) < 3:
     quit()
 fout = open(sys.argv[len(sys.argv) - 1],'w')
 fout.write('experiment,data\n');
-i = 1
+i = 1   
 for file_input in sys.argv[1:-1]:
     fin = open(file_input,'r')
     fout.write(str(i) + ',')
-    fout.write(fin.read().replace(",",";").replace("\n","|"))
+    fout.write(fin.read().replace(",",chr(31)).replace("\n",chr(30)).replace("\r",""))
     fout.write('\n')
     i+=1
     fin.close()

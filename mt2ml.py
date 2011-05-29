@@ -59,7 +59,7 @@ for row in reader:
         data['IsCorrect2'] = is_correct2
         
         time_start_to_answer = row['Answer.' + trial_name + '.time_start_to_answer'];
-        data['TimeToAnswer1FromBegin'] = time_start_to_answer
+        data['TimeToAnswer1FromBegin'] = time_start_to_answer/1000.0
         
         for j in range(1,num_frames+1):
             i = str(j)
@@ -67,7 +67,7 @@ for row in reader:
             data['[Shape Color Radius Position]'] = shapes
             data['Frame'] = i
             time_spent = row['Answer.' + trial_name + '.' + i + '.time_spent'];
-            data['TimeSpentOnFrame'] = time_spent
+            data['TimeSpentOnFrame'] = time_spent/1000.0
             if writer == 0:
                 writer = csv.DictWriter(open(sys.argv[2],'w'),sorted(data))
                 writer.writeheader()
