@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!python2.7
 
 import csv
 import sys

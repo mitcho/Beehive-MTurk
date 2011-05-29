@@ -1,0 +1,72 @@
+% Priming experiment
+%filler ITEMS - - MORE X THAN Y -|X|
+% Height	Width	FontSize
+0.18	0.18	48
+%
+*****
+target_X>Y_|X|_T_a	1	3	15
+Are there more red stars than green stars?	Press SPACE to continue.	
+Are there more red stars than green stars?	Press SPACE to continue.	0
+Are there more red stars than green stars?	Press SPACE to continue or F(NO) or J(YES) to answer.	yes
+How many red stars did you see? 	4
+%
+s	r	0.04	1	1
+s	g	0.04	1	2
+s	k	0.04	1	3
+s	r	0.04	2	5
+s	g	0.04	2	4
+s	y	0.04	2	8
+s	y	0.04	3	6
+s	y	0.04	3	9
+s	g	0.04	3	11
+s	r	0.04	4	7
+s	y	0.04	4	10
+s	y	0.04	4	13
+s	r	0.04	5	12
+s	y	0.04	5	14
+s	y	0.04	5	15
+*****
+target_X>Y_|X|_F_a	1	3	15
+Are there more blue stars than white stars?	Press SPACE to continue.	
+Are there more blue stars than white stars?	Press SPACE to continue.	0
+Are there more blue stars than white stars?	Press SPACE to continue or F(NO) or J(YES) to answer.	no
+How many blue stars did you see? 	4
+%
+s	b	0.04	1	2
+s	w	0.04	1	1
+s	k	0.04	1	5
+s	y	0.04	2	3
+s	w	0.04	2	6
+s	b	0.04	2	9
+s	b	0.04	3	4
+s	w	0.04	3	8
+s	k	0.04	3	7
+s	y	0.04	4	10
+s	b	0.04	4	11
+s	w	0.04	4	12
+s	y	0.04	5	13
+s	w	0.04	5	14
+s	y	0.04	5	15
+*****
+target_X>Y_|Z|_T_a	1	3	15
+Are there more blue stars than red stars?	Press SPACE to continue.	
+Are there more blue stars than red stars?	Press SPACE to continue.	0
+Are there more blue stars than red stars?	Press SPACE to continue or F(NO) or J(YES) to answer.	yes
+How many white stars did you see?	7
+%
+s	b	0.04	1	1
+s	w	0.04	1	2
+s	r	0.04	1	3
+s	b	0.04	2	5
+s	w	0.04	2	4
+s	b	0.04	2	8
+s	k	0.04	3	6
+s	w	0.04	3	9
+s	w	0.04	3	11
+s	r	0.04	4	7
+s	w	0.04	4	10
+s	b	0.04	4	13
+s	w	0.04	5	12
+s	w	0.04	5	14
+s	r	0.04	5	15
+*****
