@@ -27,46 +27,51 @@ reader = csv.DictReader(open(sys.argv[1],'rb'))
 writer= 0;
 
 for row in reader:
+        
     data = {}
     data['Experiment'] = row['Answer.Experiment']
     data['UserComment'] = row['Answer.comments']
     data['WorkerID'] = row['WorkerId']
     
     trial_names = row['Answer.Trial names:'].split(' ')
-    for trial_name in trial_names:
+    for i in range(len(trial_names)):
+        trial_name = trial_names[i]
         data['TrialName'] = trial_name
-        num_frames = int(row['Answer.' + trial_name + '.num_frames']);
+        num_frames = int(row['Answer.' + str(i) + '.num_frames']);
         data['NumFrames'] = num_frames
-        num_rows = int(row['Answer.' + trial_name + '.num_rows']);
+        num_rows = int(row['Answer.' + str(i) + '.num_rows']);
         data['NumRows'] = num_rows
-        num_shapes = int(row['Answer.' + trial_name + '.num_shapes']);
+        num_shapes = int(row['Answer.' + str(i) + '.num_shapes']);
         data['NumShapes'] = num_shapes
-        preemp_allowed = row['Answer.' + trial_name + '.preemp_allowed'];
+        preemp_allowed = row['Answer.' + str(i) + '.preemp_allowed'];
         data['PreempAllowed'] = preemp_allowed
 
-        usr_answer1 = row['Answer.' + trial_name + '.usr_answer1'];
+        frame_answered = row['Answer.' + str(i) + '.end_frame'];
+        data['FrameAnswered'] = frame_answered
+
+        usr_answer1 = row['Answer.' + str(i) + '.usr_answer1'];
         data['UserAnswer1'] = usr_answer1
-        correct_answer1 = row['Answer.' + trial_name + '.correct_answer1'];
+        correct_answer1 = row['Answer.' + str(i) + '.correct_answer1'];
         data['CorrectAnswer1'] = correct_answer1
-        is_correct1 = row['Answer.' + trial_name + '.is_correct1'];
+        is_correct1 = row['Answer.' + str(i) + '.is_correct1'];
         data['IsCorrect1'] = is_correct1
         
-        usr_answer2 = row['Answer.' + trial_name + '.usr_answer2'];
+        usr_answer2 = row['Answer.' + str(i) + '.usr_answer2'];
         data['UserAnswer2'] = usr_answer2
-        correct_answer2 = row['Answer.' + trial_name + '.correct_answer2'];
+        correct_answer2 = row['Answer.' + str(i) + '.correct_answer2'];
         data['CorrectAnswer2'] = correct_answer2
-        is_correct2 = row['Answer.' + trial_name + '.is_correct2'];
+        is_correct2 = row['Answer.' + str(i) + '.is_correct2'];
         data['IsCorrect2'] = is_correct2
         
-        time_start_to_answer = row['Answer.' + trial_name + '.time_start_to_answer'];
+        time_start_to_answer = float(row['Answer.' + str(i) + '.time_start_to_answer']);
         data['TimeToAnswer1FromBegin'] = time_start_to_answer/1000.0
         
         for j in range(1,num_frames+1):
-            i = str(j)
-            shapes = row['Answer.' + trial_name + '.' + i + '.shapes'];
+            k = str(j)
+            shapes = row['Answer.' + str(i) + '.' + k + '.shapes'];
             data['[Shape Color Radius Position]'] = shapes
-            data['Frame'] = i
-            time_spent = row['Answer.' + trial_name + '.' + i + '.time_spent'];
+            data['Frame'] = k
+            time_spent = float(row['Answer.' + str(i) + '.' + k + '.time_spent']);
             data['TimeSpentOnFrame'] = time_spent/1000.0
             if writer == 0:
                 writer = csv.DictWriter(open(sys.argv[2],'w'),sorted(data))

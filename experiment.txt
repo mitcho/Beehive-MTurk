@@ -1,8 +1,8 @@
 0.10	0.10	16
 *****
 TrialA	1	4	24	9
-(TA) Are there more doodads than gadgets?	Press b to continue.
-Are there more doodads than gadgets?	Press f/j to answer or b to continue.	1
+(TA) Are there more doodads than gadgets?	Press SPACE to continue.
+Are there more doodads than gadgets?	Press f/j to answer or SPACE to continue.	1
 Are there more doodads than gadgets?	Press f/j to answer.	yes
 How many cats do you own?	10
 c	r	0.01	1	(2,3)
@@ -31,8 +31,8 @@ s	b	0.04	9	(6,3)
 q	y	0.05	9	(2,1)
 *****
 TrialB	1	3	24	5
-(TB) Are there more doodads than gadgets?	Press b to continue.
-Are there more doodads than gadgets?	Press f/j to answer or b to continue.	1
+(TB) Are there more doodads than gadgets?	Press SPACE to continue.
+Are there more doodads than gadgets?	Press f/j to answer or SPACE to continue.	1
 Are there more doodads than gadgets?	Press f/j to answer.	no
 How many cats do you own?	10
 c	r	0.07	4
@@ -61,8 +61,8 @@ c	r	0.07	4
 c	r	0.07	4
 *****
 TrialC	1	4	24	24
-(TC) Are there more doodads than gadgets?	Press b to continue.
-Are there more doodads than gadgets?	Press f/j to answer or b to continue.	1
+(TC) Are there more doodads than gadgets?	Press SPACE to continue.
+Are there more doodads than gadgets?	Press f/j to answer or SPACE to continue.	1
 Are there more doodads than gadgets?	Press f/j to answer.	no
 How many cats do you own?	10
 c	r	0.01	1	24
